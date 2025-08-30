@@ -1,12 +1,18 @@
 'use client'
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import Modal from 'react-modal';
 
 interface Note {
   _id: string;
   title: string;
   content: string;
   createdAt: string;
+}
+
+// Set the app element for accessibility
+if (typeof window !== 'undefined') {
+  Modal.setAppElement('body');
 }
 
 export default function Dashboard() {
@@ -18,7 +24,6 @@ export default function Dashboard() {
   const [newNote, setNewNote] = useState({ title: '', content: '' });
   const [loading, setLoading] = useState(false);
 
-  // Fetch notes when component mounts
   useEffect(() => {
     if (session?.user?.email) {
       fetchNotes();
@@ -39,7 +44,6 @@ export default function Dashboard() {
 
   const createNote = async () => {
     if (!newNote.title.trim() || !newNote.content.trim()) return;
-    
     setLoading(true);
     try {
       const response = await fetch('/api/notes', {
@@ -47,12 +51,11 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newNote),
       });
-      
       if (response.ok) {
         const data = await response.json();
         setNotes([data.note, ...notes]);
         setNewNote({ title: '', content: '' });
-        setIsCreateModalOpen(false);
+        closeCreateModal();
       }
     } catch (error) {
       console.error('Error creating note:', error);
@@ -65,7 +68,6 @@ export default function Dashboard() {
       const response = await fetch(`/api/notes/${noteId}`, {
         method: 'DELETE',
       });
-      
       if (response.ok) {
         setNotes(notes.filter(note => note._id !== noteId));
       }
@@ -77,6 +79,16 @@ export default function Dashboard() {
   const openViewModal = (note: Note) => {
     setSelectedNote(note);
     setIsViewModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    setIsCreateModalOpen(false);
+    setNewNote({ title: '', content: '' });
+  };
+
+  const closeViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedNote(null);
   };
 
   if (status === 'loading') {
@@ -162,76 +174,84 @@ export default function Dashboard() {
       </div>
 
       {/* Create Note Modal */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
-            <div className="flex justify-between items-center p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">Create New Note</h2>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={newNote.title}
-                  onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-                  placeholder="Enter note title..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Content
-                </label>
-                <textarea
-                  value={newNote.content}
-                  onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                  placeholder="Write your note here..."
-                  rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end gap-3 p-6 border-t">
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createNote}
-                disabled={loading || !newNote.title.trim() || !newNote.content.trim()}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {loading ? 'Creating...' : 'Create'}
-              </button>
-            </div>
+      <Modal
+        isOpen={isCreateModalOpen}
+        onRequestClose={closeCreateModal}
+        contentLabel="Create New Note"
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-20 outline-none"
+        overlayClassName="fixed inset-0 flex items-start justify-center z-50 p-4 backdrop-blur-sm bg-white/20"
+      >
+        <div className="flex justify-between items-center p-6 border-b">
+          <h2 className="text-xl font-semibold text-gray-900">Create New Note</h2>
+          <button
+            onClick={closeCreateModal}
+            className="text-gray-400 hover:text-gray-600 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Title
+            </label>
+            <input
+              type="text"
+              value={newNote.title}
+              onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
+              placeholder="Enter note title..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Content
+            </label>
+            <textarea
+              value={newNote.content}
+              onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+              placeholder="Write your note here..."
+              rows={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
+            />
           </div>
         </div>
-      )}
+        
+        <div className="flex justify-end gap-3 p-6 border-t">
+          <button
+            onClick={closeCreateModal}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={createNote}
+            disabled={loading || !newNote.title.trim() || !newNote.content.trim()}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {loading ? 'Creating...' : 'Create'}
+          </button>
+        </div>
+      </Modal>
 
       {/* View Note Modal */}
-      {isViewModalOpen && selectedNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+      <Modal
+        isOpen={isViewModalOpen}
+        onRequestClose={closeViewModal}
+        contentLabel="View Note"
+        className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto mt-20 outline-none"
+        overlayClassName="fixed inset-0 flex items-start justify-center z-50 p-4 backdrop-blur-sm bg-white/20"
+      >
+        {selectedNote && (
+          <>
             <div className="flex justify-between items-center p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-900">View Note</h2>
               <button
-                onClick={() => setIsViewModalOpen(false)}
+                onClick={closeViewModal}
                 className="text-gray-400 hover:text-gray-600 transition"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -271,15 +291,15 @@ export default function Dashboard() {
             
             <div className="flex justify-end gap-3 p-6 border-t">
               <button
-                onClick={() => setIsViewModalOpen(false)}
+                onClick={closeViewModal}
                 className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
               >
                 Close
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

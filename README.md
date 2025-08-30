@@ -207,6 +207,7 @@ npm run build
 2. Deploy the `.next` folder to Netlify
 3. Configure environment variables
 
+<!--
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -218,7 +219,7 @@ npm run build
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+-->
 ## 👤 Author
 
 **Harsh Geed**
@@ -245,7 +246,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🐛 Known Issues
 
 - None currently reported
-
+<!--
 ## 🔮 Future Enhancements
 
 - [ ] Rich text editor for notes
@@ -255,7 +256,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Dark mode support
 - [ ] Note sharing capabilities
 - [ ] Real-time collaboration
-
+-->
 ---
 
 Made with ❤️ using Next.js 15 and TypeScript

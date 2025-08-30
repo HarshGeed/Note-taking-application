@@ -3,7 +3,6 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IUser extends Document {
   name: string;
   email: string;
-  password: string;
   notes: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -21,10 +20,6 @@ const UserSchema: Schema<IUser> = new Schema<IUser>({
     unique: true,
     lowercase: true,
     trim: true,
-  },
-  password: {
-    type: String,
-    required: true,
   },
   notes: [{
     type: mongoose.Schema.Types.ObjectId,

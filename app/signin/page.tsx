@@ -5,38 +5,106 @@ import { signIn } from 'next-auth/react';
 import leftColImg from '@/public/leftCol.jpg'
 
 export default function SigninPage() {
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: '', otp: '' });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleSendOtp = async () => {
+    setError('');
+    setSuccess('');
+    if (!form.email) {
+      setError('Please enter your email to receive OTP.');
+      return;
+    }
+    setLoading(true);
+    const res = await fetch('/api/user/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.email }),
+    });
+    const data = await res.json();
+    setLoading(false);
+    if (res.ok) {
+      setSuccess('OTP sent to your email.');
+      setOtpSent(true);
+    } else setError(data.error || 'Failed to send OTP.');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
     const res = await signIn('credentials', {
       redirect: false,
       email: form.email,
-      password: form.password,
+      otp: form.otp,
     });
     setLoading(false);
-    if (res?.error) setError(res.error);
+    if (res?.error) {
+      setError(res.error);
+    } else {
+      setSuccess('Sign in successful!');
+      // Redirect to homepage after successful login
+      window.location.href = '/';
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-tr from-blue-100 via-white to-purple-100">
+      {/* Left: Form */}
       <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
         <div className="w-full max-w-md bg-white/60 backdrop-blur-lg rounded-2xl shadow-xl p-8 flex flex-col items-center">
           <h2 className="text-4xl font-extrabold mb-6 text-gray-800 tracking-tight">Sign In</h2>
           <form className="w-full space-y-5" onSubmit={handleSubmit}>
-            <input name="email" type="email" placeholder="Email" className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" value={form.email} onChange={handleChange} required />
-            <input name="password" type="password" placeholder="Password" className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition" value={form.password} onChange={handleChange} required />
+            <input 
+              name="email" 
+              type="email" 
+              placeholder="Email" 
+              className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black" 
+              value={form.email} 
+              onChange={handleChange} 
+              required 
+            />
+            <div className="flex gap-2">
+              <input
+                name="otp"
+                type="text"
+                placeholder="OTP"
+                className="input flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black"
+                value={form.otp}
+                onChange={handleChange}
+                required
+              />
+              <button
+                type="button"
+                className="btn py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60"
+                onClick={handleSendOtp}
+                disabled={loading || otpSent}
+              >
+                {otpSent ? 'OTP Sent' : 'Send OTP'}
+              </button>
+            </div>
             {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-            <button type="submit" className="btn w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60" disabled={loading}>{loading ? 'Signing in...' : 'Sign In'}</button>
+            {success && <div className="text-green-600 text-sm text-center">{success}</div>}
+            <button 
+              type="submit" 
+              className="btn w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60" 
+              disabled={loading || !otpSent}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
           </form>
+          <p className="text-sm text-gray-600 mt-4">
+            Don't have an account?{' '}
+            <a href="/signup" className="text-blue-600 hover:underline">Sign up</a>
+          </p>
           <div className="w-full flex items-center my-4">
             <div className="flex-grow h-px bg-gray-300" />
             <span className="mx-2 text-gray-400 text-xs">OR</span>
@@ -48,6 +116,7 @@ export default function SigninPage() {
           </button>
         </div>
       </div>
+      {/* Right: Image */}
       <div className="hidden md:flex w-1/2 relative">
         <Image src={leftColImg} alt="Signin" fill className="object-cover" priority />
       </div>

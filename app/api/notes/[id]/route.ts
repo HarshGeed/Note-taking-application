@@ -6,9 +6,10 @@ import User from '@/models/userModel';
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -28,16 +29,16 @@ export async function DELETE(
       await user.save();
     }
 
-    const note = await Note.findOne({ _id: params.id, author: user._id });
+    const note = await Note.findOne({ _id: id, author: user._id });
     if (!note) {
       return NextResponse.json({ error: 'Note not found or unauthorized' }, { status: 404 });
     }
 
-    await Note.findByIdAndDelete(params.id);
+    await Note.findByIdAndDelete(id);
 
     // Remove note from user's notes array
     await User.findByIdAndUpdate(user._id, {
-      $pull: { notes: params.id }
+      $pull: { notes: id }
     });
 
     return NextResponse.json({ message: 'Note deleted successfully' });

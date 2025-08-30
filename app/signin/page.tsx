@@ -59,21 +59,21 @@ export default function SigninPage() {
 
   return (
     <div className="h-screen flex bg-white overflow-hidden">
-      {/* Left Form Section - takes ~40% of screen */}
-      <div className="w-2/5 p-8 lg:p-12 flex flex-col justify-center bg-white overflow-y-auto">
+      {/* Left Form Section - takes ~40% of screen on desktop, full width on mobile */}
+      <div className="w-full md:w-2/5 p-8 lg:p-12 flex flex-col justify-center bg-white overflow-y-auto">
         
-        {/* Logo Section */}
-        <div className="flex items-center mb-8 mx-4">
+        {/* Logo Section - centered on mobile */}
+        <div className="flex items-center justify-center md:justify-start mb-8 mx-4">
           <div className="h-6 w-6 mr-2 flex items-center justify-center">
             <Image src={logo} alt='logo'/>
           </div>
           <span className="text-lg font-semibold text-gray-800">HD</span>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-center max-w-md mx-4">
-          <h1 className="text-3xl font-bold text-gray-900">Sign in</h1>
-          <p className="text-gray-500 mt-2 mb-6">
+        {/* Form - centered on mobile, left-aligned on desktop */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-center max-w-md mx-auto md:mx-4">
+          <h1 className="text-3xl font-bold text-gray-900 text-center md:text-left">Sign in</h1>
+          <p className="text-gray-500 mt-2 mb-6 text-center md:text-left">
             Welcome back! Sign in to your account
           </p>
 
@@ -166,8 +166,8 @@ export default function SigninPage() {
         </form>
       </div>
 
-      {/* Right Image Section - takes ~60% of screen */}
-      <div className="w-3/5 relative overflow-hidden my-2 rounded-2xl mx-2">
+      {/* Right Image Section - takes ~60% of screen, hidden on mobile */}
+      <div className="hidden md:block w-3/5 relative overflow-hidden my-2 rounded-2xl mx-2">
         <Image
           src={rightColumn}
           alt="Signin illustration"

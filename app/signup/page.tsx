@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import React, { useState } from 'react';
 import rightColumn from '@/public/right-column.jpg'
+import logo from '@/public/logo.png'
 
 export default function SignUpPage() {
   const [form, setForm] = useState({ name: '', email: '', dob: '', otp: '' });
@@ -58,8 +59,8 @@ export default function SignUpPage() {
         
         {/* Logo Section */}
         <div className="flex items-center mb-8 mx-4">
-          <div className="h-6 w-6 mr-2 bg-blue-500 rounded-sm flex items-center justify-center">
-            <span className="text-white text-xs font-bold">HD</span>
+          <div className="h-6 w-6 mr-2 flex items-center justify-center">
+            <Image src={logo} alt='logo'/>
           </div>
           <span className="text-lg font-semibold text-gray-800">HD</span>
         </div>

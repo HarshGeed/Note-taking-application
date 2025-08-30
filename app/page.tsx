@@ -2,6 +2,8 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import Modal from 'react-modal';
+import Image from 'next/image';
+import logo from '@/public/logo.png'
 
 interface Note {
   _id: string;
@@ -117,7 +119,9 @@ export default function Dashboard() {
       {/* Header */}
       <div className="w-full max-w-md flex items-center justify-between px-4 mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+          <div className="w-8 h-8 pt-1">
+            <Image src={logo} alt='logo'/>
+          </div>
           <span className="font-semibold text-lg text-gray-800">Dashboard</span>
         </div>
         <button 

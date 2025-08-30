@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import leftColImg from '@/public/leftCol.jpg'
+import rightColumn from '@/public/right-column.jpg'
 
 export default function SigninPage() {
   const [form, setForm] = useState({ email: '', otp: '' });
@@ -57,68 +57,124 @@ export default function SigninPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-tr from-blue-100 via-white to-purple-100">
-      {/* Left: Form */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <div className="w-full max-w-md bg-white/60 backdrop-blur-lg rounded-2xl shadow-xl p-8 flex flex-col items-center">
-          <h2 className="text-4xl font-extrabold mb-6 text-gray-800 tracking-tight">Sign In</h2>
-          <form className="w-full space-y-5" onSubmit={handleSubmit}>
-            <input 
-              name="email" 
-              type="email" 
-              placeholder="Email" 
-              className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black" 
-              value={form.email} 
-              onChange={handleChange} 
-              required 
+    <div className="h-screen flex bg-white overflow-hidden">
+      {/* Left Form Section - takes ~40% of screen */}
+      <div className="w-2/5 p-8 lg:p-12 flex flex-col justify-center bg-white overflow-y-auto">
+        
+        {/* Logo Section */}
+        <div className="flex items-center mb-8 mx-4">
+          <div className="h-6 w-6 mr-2 bg-blue-500 rounded-sm flex items-center justify-center">
+            <span className="text-white text-xs font-bold">HD</span>
+          </div>
+          <span className="text-lg font-semibold text-gray-800">HD</span>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-center max-w-md mx-4">
+          <h1 className="text-3xl font-bold text-gray-900">Sign in</h1>
+          <p className="text-gray-500 mt-2 mb-6">
+            Welcome back! Sign in to your account
+          </p>
+
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-600 mb-1">Email</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="jonas_kahnwald@gmail.com"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
-            <div className="flex gap-2">
+          </div>
+
+          {/* OTP Field (shown after OTP is sent) */}
+          {otpSent && (
+            <div className="mb-4">
+              <label className="block text-sm text-gray-600 mb-1">OTP</label>
               <input
                 name="otp"
                 type="text"
-                placeholder="OTP"
-                className="input flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black"
+                placeholder="Enter OTP"
                 value={form.otp}
                 onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
-              <button
-                type="button"
-                className="btn py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60"
-                onClick={handleSendOtp}
-                disabled={loading || otpSent}
-              >
-                {otpSent ? 'OTP Sent' : 'Send OTP'}
-              </button>
             </div>
-            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-            {success && <div className="text-green-600 text-sm text-center">{success}</div>}
+          )}
+
+          {/* Error/Success Messages */}
+          {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+          {success && <div className="text-green-600 text-sm mb-4">{success}</div>}
+
+          {/* Button */}
+          {!otpSent ? (
             <button 
-              type="submit" 
-              className="btn w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60" 
-              disabled={loading || !otpSent}
+              type="button"
+              onClick={handleSendOtp}
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50"
+            >
+              {loading ? 'Sending...' : 'Get OTP'}
+            </button>
+          ) : (
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
-          </form>
-          <p className="text-sm text-gray-600 mt-4">
-            Don't have an account?{' '}
-            <a href="/signup" className="text-blue-600 hover:underline">Sign up</a>
-          </p>
+          )}
+
+          {/* OR divider */}
           <div className="w-full flex items-center my-4">
             <div className="flex-grow h-px bg-gray-300" />
             <span className="mx-2 text-gray-400 text-xs">OR</span>
             <div className="flex-grow h-px bg-gray-300" />
           </div>
-          <button className="btn w-full py-3 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold flex items-center justify-center gap-2 shadow-sm transition" onClick={() => signIn('google')}>
-            <svg className="w-5 h-5" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.22l6.85-6.85C35.64 2.7 30.18 0 24 0 14.82 0 6.73 5.82 2.69 14.09l7.98 6.19C12.13 13.13 17.56 9.5 24 9.5z"/><path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.04l7.19 5.59C43.98 37.13 46.1 31.3 46.1 24.55z"/><path fill="#FBBC05" d="M10.67 28.28a14.5 14.5 0 0 1 0-8.56l-7.98-6.19A23.97 23.97 0 0 0 0 24c0 3.77.9 7.34 2.69 10.47l7.98-6.19z"/><path fill="#EA4335" d="M24 48c6.18 0 11.64-2.05 15.52-5.59l-7.19-5.59c-2.01 1.35-4.6 2.16-8.33 2.16-6.44 0-11.87-3.63-14.33-8.91l-7.98 6.19C6.73 42.18 14.82 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></g></svg>
+
+          {/* Google Sign In */}
+          <button 
+            type="button"
+            onClick={() => signIn('google')}
+            className="w-full bg-white border border-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-50 transition flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 48 48">
+              <g>
+                <path fill="#4285F4" d="M24 9.5c3.54 0 6.7 1.22 9.19 3.22l6.85-6.85C35.64 2.7 30.18 0 24 0 14.82 0 6.73 5.82 2.69 14.09l7.98 6.19C12.13 13.13 17.56 9.5 24 9.5z"/>
+                <path fill="#34A853" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.74H24v9.01h12.42c-.54 2.9-2.18 5.36-4.65 7.04l7.19 5.59C43.98 37.13 46.1 31.3 46.1 24.55z"/>
+                <path fill="#FBBC05" d="M10.67 28.28a14.5 14.5 0 0 1 0-8.56l-7.98-6.19A23.97 23.97 0 0 0 0 24c0 3.77.9 7.34 2.69 10.47l7.98-6.19z"/>
+                <path fill="#EA4335" d="M24 48c6.18 0 11.64-2.05 15.52-5.59l-7.19-5.59c-2.01 1.35-4.6 2.16-8.33 2.16-6.44 0-11.87-3.63-14.33-8.91l-7.98 6.19C6.73 42.18 14.82 48 24 48z"/>
+                <path fill="none" d="M0 0h48v48H0z"/>
+              </g>
+            </svg>
             Sign in with Google
           </button>
-        </div>
+
+          {/* Sign up link */}
+          <p className="mt-4 text-sm text-gray-600">
+            Don't have an account?{" "}
+            <a href="/signup" className="text-blue-500 hover:underline">
+              Sign up
+            </a>
+          </p>
+        </form>
       </div>
-      {/* Right: Image */}
-      <div className="hidden md:flex w-1/2 relative">
-        <Image src={leftColImg} alt="Signin" fill className="object-cover" priority />
+
+      {/* Right Image Section - takes ~60% of screen */}
+      <div className="w-3/5 relative overflow-hidden my-2 rounded-2xl mx-2">
+        <Image
+          src={rightColumn}
+          alt="Signin illustration"
+          width={1000}
+          height={800}
+          className="w-full h-screen object-cover"
+          priority
+        />
       </div>
     </div>
   );

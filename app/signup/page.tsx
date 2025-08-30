@@ -1,9 +1,9 @@
 'use client'
 import Image from 'next/image';
 import React, { useState } from 'react';
-import leftColImg from '@/public/leftCol.jpg'
+import rightColumn from '@/public/right-column.jpg'
 
-export default function SignupPage() {
+export default function SignUpPage() {
   const [form, setForm] = useState({ name: '', email: '', dob: '', otp: '' });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -52,83 +52,127 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-tr from-blue-100 via-white to-purple-100">
-      
-      {/* Left: Form */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-8">
-        <div className="w-full max-w-md bg-white/60 backdrop-blur-lg rounded-2xl shadow-xl p-8 flex flex-col items-center">
-          <h2 className="text-4xl font-extrabold mb-6 text-gray-800 tracking-tight">Sign Up</h2>
-          <form className="w-full space-y-5" onSubmit={handleSubmit}>
+    <div className="h-screen flex bg-white overflow-hidden">
+      {/* Left Form Section - takes ~40% of screen */}
+      <div className="w-2/5 p-8 lg:p-12 flex flex-col justify-center bg-white overflow-y-auto">
+        
+        {/* Logo Section */}
+        <div className="flex items-center mb-8 mx-4">
+          <div className="h-6 w-6 mr-2 bg-blue-500 rounded-sm flex items-center justify-center">
+            <span className="text-white text-xs font-bold">HD</span>
+          </div>
+          <span className="text-lg font-semibold text-gray-800">HD</span>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-center max-w-md mx-4">
+          <h1 className="text-3xl font-bold text-gray-900">Sign up</h1>
+          <p className="text-gray-500 mt-2 mb-6 ">
+            Sign up to enjoy the feature of HD
+          </p>
+
+          {/* Name */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-600 mb-1">Your Name</label>
             <input
               name="name"
               type="text"
-              placeholder="Name"
-              className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black"
+              placeholder="Jonas Khanwald"
               value={form.name}
               onChange={handleChange}
-              required
-              // disabled={!otpSent}
-            />
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black"
-              value={form.email}
-              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               required
             />
+          </div>
+
+          {/* DOB */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-600 mb-1">Date of Birth</label>
             <input
               name="dob"
               type="date"
-              placeholder="Date of Birth"
-              className="input block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black"
               value={form.dob}
               onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
               required
-              // disabled={!otpSent}
             />
-            <div className="flex gap-2">
+          </div>
+
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-600 mb-1">Email</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="jonas_kahnwald@gmail.com"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* OTP Field (shown after OTP is sent) */}
+          {otpSent && (
+            <div className="mb-4">
+              <label className="block text-sm text-gray-600 mb-1">OTP</label>
               <input
                 name="otp"
                 type="text"
-                placeholder="OTP"
-                className="input flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none transition text-black"
+                placeholder="Enter OTP"
                 value={form.otp}
                 onChange={handleChange}
+                className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
-              <button
-                type="button"
-                className="btn py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60"
-                onClick={handleSendOtp}
-                disabled={loading || otpSent}
-              >
-                {otpSent ? 'OTP Sent' : 'Send OTP'}
-              </button>
             </div>
-            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-            {success && <div className="text-green-600 text-sm text-center">{success}</div>}
-            <button
+          )}
+
+          {/* Error/Success Messages */}
+          {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+          {success && <div className="text-green-600 text-sm mb-4">{success}</div>}
+
+          {/* Button */}
+          {!otpSent ? (
+            <button 
+              type="button"
+              onClick={handleSendOtp}
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50"
+            >
+              {loading ? 'Sending...' : 'Get OTP'}
+            </button>
+          ) : (
+            <button 
               type="submit"
-              className="btn w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition disabled:opacity-60"
-              disabled={loading || !otpSent}
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition disabled:opacity-50"
             >
               {loading ? 'Signing up...' : 'Sign Up'}
             </button>
-          </form>
-          <p className="text-sm text-gray-600 mt-4">
-            Already have an account?{' '}
-            <a href="/signin" className="text-blue-600 hover:underline">Sign in</a>
+          )}
+
+          {/* Sign in link */}
+          <p className="mt-4 text-sm text-gray-600">
+            Already have an account?{" "}
+            <a href="/signin" className="text-blue-500 hover:underline">
+              Sign in
+            </a>
           </p>
-        </div>
+        </form>
       </div>
-      {/* Right: Image */}
-      <div className="hidden md:flex w-1/2 relative">
-        <Image src={leftColImg} alt="Signup" fill className="object-cover" priority />
+
+      {/* Right Image Section - takes ~60% of screen */}
+      <div className="w-3/5 relative overflow-hidden my-2 rounded-2xl mx-2">
+        <Image
+          src={rightColumn}
+          alt="Signup illustration"
+          width={1000}
+          height={800}
+          className="w-full h-screen object-cover"
+          priority
+        />
       </div>
     </div>
   );
 }
-
-// Add some basic Tailwind CSS classes for .input and .btn in your global styles.

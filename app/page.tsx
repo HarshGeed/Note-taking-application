@@ -1,9 +1,6 @@
 'use client'
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, X, LogOut } from 'lucide-react';
-import logo from '@/public/logo.png'
-import Image from 'next/image';
 
 interface Note {
   _id: string;
@@ -12,10 +9,12 @@ interface Note {
   createdAt: string;
 }
 
-export default function Home() {
+export default function Dashboard() {
   const { data: session, status } = useSession();
   const [notes, setNotes] = useState<Note[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [newNote, setNewNote] = useState({ title: '', content: '' });
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +52,7 @@ export default function Home() {
         const data = await response.json();
         setNotes([data.note, ...notes]);
         setNewNote({ title: '', content: '' });
-        setIsModalOpen(false);
+        setIsCreateModalOpen(false);
       }
     } catch (error) {
       console.error('Error creating note:', error);
@@ -73,6 +72,11 @@ export default function Home() {
     } catch (error) {
       console.error('Error deleting note:', error);
     }
+  };
+
+  const openViewModal = (note: Note) => {
+    setSelectedNote(note);
+    setIsViewModalOpen(true);
   };
 
   if (status === 'loading') {
@@ -97,66 +101,60 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Logo */}
-      <div className='flex'>
-        <Image src={logo} alt='logo'/>
-        <h2 className=''>Dashboard</h2>
-        <button
-              onClick={() => signOut()}
-              className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-gray-900 transition"
-            >
-              Sign Out
-            </button>
-      </div>
+    <div className="min-h-screen flex flex-col bg-white items-center justify-start pt-6">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Welcome, {session.user?.name}</h1>
-              <p className="text-gray-600">{session.user?.email}</p>
-            </div>
-            
-          </div>
+      <div className="w-full max-w-md flex items-center justify-between px-4 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+          <span className="font-semibold text-lg text-gray-800">Dashboard</span>
         </div>
+        <button 
+          onClick={() => signOut()}
+          className="text-blue-600 hover:underline font-medium text-sm"
+        >
+          Sign Out
+        </button>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Create Note Button */}
-        <div className="mb-8">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            <Plus size={20} />
-            Create Note
-          </button>
-        </div>
+      {/* Welcome Card */}
+      <div className="w-full max-w-md bg-white rounded-lg shadow p-4 mb-4">
+        <p className="font-bold text-gray-800 text-lg">Welcome, {session.user?.name || 'User'} !</p>
+        <p className="text-gray-500 text-sm mt-1">Email: {session.user?.email}</p>
+      </div>
 
-        {/* Notes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Create Note Button */}
+      <button 
+        onClick={() => setIsCreateModalOpen(true)}
+        className="w-full max-w-md bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded shadow mb-4"
+      >
+        Create Note
+      </button>
+
+      {/* Notes List */}
+      <div className="w-full max-w-md">
+        <p className="font-semibold text-gray-800 mb-2">Notes</p>
+        <div className="space-y-3">
           {notes.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">No notes yet. Create your first note!</p>
-            </div>
+            <p className="text-gray-500 text-center py-4">No notes yet. Create your first note!</p>
           ) : (
             notes.map((note) => (
-              <div key={note._id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{note.title}</h3>
-                  <button
-                    onClick={() => deleteNote(note._id)}
-                    className="text-gray-400 hover:text-red-500 transition p-1"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-                <p className="text-gray-600 mb-4 line-clamp-3">{note.content}</p>
-                <p className="text-xs text-gray-400">
-                  {new Date(note.createdAt).toLocaleDateString()}
-                </p>
+              <div key={note._id} className="flex items-center justify-between bg-gray-100 rounded-md px-4 py-2 shadow">
+                <span 
+                  className="text-gray-700 cursor-pointer hover:text-blue-600 flex-1"
+                  onClick={() => openViewModal(note)}
+                >
+                  {note.title}
+                </span>
+                <button 
+                  onClick={() => deleteNote(note._id)}
+                  className="text-gray-500 hover:text-red-500 ml-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
               </div>
             ))
           )}
@@ -164,16 +162,18 @@ export default function Home() {
       </div>
 
       {/* Create Note Modal */}
-      {isModalOpen && (
+      {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
             <div className="flex justify-between items-center p-6 border-b">
               <h2 className="text-xl font-semibold text-gray-900">Create New Note</h2>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsCreateModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 transition"
               >
-                <X size={24} />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
             
@@ -207,7 +207,7 @@ export default function Home() {
             
             <div className="flex justify-end gap-3 p-6 border-t">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => setIsCreateModalOpen(false)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
               >
                 Cancel
@@ -218,6 +218,63 @@ export default function Home() {
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 {loading ? 'Creating...' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Note Modal */}
+      {isViewModalOpen && selectedNote && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">View Note</h2>
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
+                  {selectedNote.title}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Content
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 min-h-[150px] whitespace-pre-wrap">
+                  {selectedNote.content}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Created At
+                </label>
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900">
+                  {new Date(selectedNote.createdAt).toLocaleDateString()} {new Date(selectedNote.createdAt).toLocaleTimeString()}
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3 p-6 border-t">
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+              >
+                Close
               </button>
             </div>
           </div>
